@@ -9,30 +9,27 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi('main.ui', self)
-        self.tableWidget.setColumnCount(7)
-        self.tableWidget.setRowCount(2)
-        self.tableWidget.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
         # Подключение к БД
+
         con = sqlite3.connect("coffee.db")
-
-        # Создание курсора
         cur = con.cursor()
-
-        # Выполнение запроса и получение всех результатов
         result = cur.execute("""SELECT id, 
-        name_of_sort as [Сорт],
-        degree_of_roasting as [Степень обжарки],
-        ground_or_grain as [Молотый/Зерновой],
-        description_taste as [Описание вкуса],
-        cost as [Цена],
-        volume as [Объем] FROM list_coffee
-        """).fetchall()
+                name_of_sort as [Сорт],
+                degree_of_roasting as [Степень обжарки],
+                ground_or_grain as [Молотый/Зерновой],
+                description_taste as [Описание вкуса],
+                cost as [Цена],
+                volume as [Объем] FROM list_coffee
+                """).fetchall()
+        self.tableWidget.setRowCount(len(result))
 
-        for i in range(len(result)):
-            for j in range(7):
-                self.tableWidget.setItem(i, j, QTableWidgetItem(str(result[i][j])))
+        self.titles = [description[0] for description in cur.description]
+        self.tableWidget.setColumnCount(len(self.titles))
+        self.tableWidget.setHorizontalHeaderLabels(self.titles)
+        for i, elem in enumerate(result):
+            for j, val in enumerate(elem):
+                self.tableWidget.setItem(i, j, QTableWidgetItem(str(val)))
         self.tableWidget.resizeColumnsToContents()
-
         con.close()
 
 
